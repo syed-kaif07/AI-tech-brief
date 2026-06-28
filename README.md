@@ -4,7 +4,7 @@ Automated daily email with the latest AI/LLM and tech news. Fetches RSS feeds fr
 
 **Schedule:** 7:00 AM IST daily  
 **Delivery:** Gmail SMTP  
-**Recipients:** syedkaifuddin4@gmail.com, rahmnatwork@gmail.com
+**Recipients:** Configured via `.env`
 
 ---
 
@@ -22,13 +22,13 @@ cd "AI-tech-brief"
 pip install -r requirements.txt
 ```
 
-Add secrets to `.env`:
+Add secrets to `.env` (copy from `.env.example`):
 
 ```env
-EMAIL_ADDRESS=syedkaifuddin777@gmail.com
-EMAIL_APP_PASSWORD=your_app_password_here
-RECIPIENT_EMAIL=syedkaifuddin4@gmail.com,rahmnatwork@gmail.com
-SENDER_EMAIL=syedkaifuddin777@gmail.com
+EMAIL_ADDRESS=your-email@gmail.com
+EMAIL_APP_PASSWORD=your-app-password
+RECIPIENT_EMAIL=recipient1@email.com,recipient2@email.com
+SENDER_EMAIL=your-email@gmail.com
 ```
 
 Test once:
