@@ -14,8 +14,8 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL", EMAIL_ADDRESS)
 
 FEEDS_FILE = "feeds.json"
 OUTPUT_FILE = "public/data/daily-brief.json"
-HOURS_LOOKBACK = 24
-MAX_ARTICLES = 25
+HOURS_LOOKBACK = int(os.getenv("HOURS_LOOKBACK", "24"))
+MAX_ARTICLES = int(os.getenv("MAX_ARTICLES", "25"))
 
 KEYWORDS_WEIGHT = [
     "agent","agentic","llm","language model","gpt","claude","openai",

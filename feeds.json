@@ -8,6 +8,7 @@
     { "name": "MIT Technology Review", "url": "https://www.technologyreview.com/feed/", "category": "tech" },
     { "name": "Machine Learning Subreddit", "url": "https://www.reddit.com/r/MachineLearning/.rss", "category": "ai" },
     { "name": "Hardware Subreddit", "url": "https://www.reddit.com/r/hardware/.rss", "category": "hardware" },
-    { "name": "AI Agents Subreddit", "url": "https://www.reddit.com/r/AI_Agents/.rss", "category": "ai" }
+    { "name": "AI Agents Subreddit", "url": "https://www.reddit.com/r/AI_Agents/.rss", "category": "ai" },
+    { "name": "Google News AI Search", "url": "https://news.google.com/rss/search?q=AI+LLM+agentic+artificial+intelligence&hl=en-US&gl=US&ceid=US:en", "category": "ai" }
   ]
 }
