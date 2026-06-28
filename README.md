@@ -1,118 +1,81 @@
-# Tech Brief — Daily AI/Tech Email Brief
+# Daily AI Tech Brief
 
-Fetches last 24h of curated tech + AI/LLM RSS feeds, filters + ranks by relevance, formats into a clean HTML email, and sends it to your Gmail. Runs automatically every day at 7 AM IST via GitHub Actions.
+Automated daily email with the latest AI/LLM and tech news. Fetches RSS feeds from the last 24 hours, filters for relevance, formats a clean dark-mode HTML brief, and sends it to your inbox.
 
+**Schedule:** 7:00 AM IST daily  
+**Delivery:** Gmail SMTP  
+**Recipients:** syedkaifuddin4@gmail.com, rahmnatwork@gmail.com
 
+---
 
-## ⚡ Quick Start
+## System Flow
 
-1. Clone
-   ```bash
-   git clone <your-repo-url>
-   cd "AI TECH BRIEF GMAIL SETUP"
-   ```
+View the system diagram: open `flowchart.html` in your browser.
 
-2. Install dependencies
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-3. Add your secrets to `.env`
-   ```env
-   RESEND_API_KEY=re_...
-   SENDER_EMAIL=AI Brief <onboarding@resend.dev>
-   RECIPIENT_EMAIL=you@gmail.com
-   ```
+## Quick Start
 
-4. Test once
-   ```bash
-   python fetch_and_send.py
-   ```
-   Check your inbox. If it works, run it once manually whenever you want a fresh brief.
-
-## 🔁 Automation (GitHub Actions)
-
-The cron in `.github/workflows/daily-brief.yml` runs:
-
-- **7 AM IST** every day (default)
-- Optional second run: uncomment/add a second `cron` in the same file
-
-### Changing the schedule
-Edit `.github/workflows/daily-brief.yml`:
-
-```yaml
-on:
-  schedule:
-    - cron: '0 1:30 * * *'   # 7:00 AM IST
-    - cron: '0 8:30 * * *'   # 2:00 PM IST (uncomment for second daily run)
-  workflow_dispatch:         # allows manual "Run workflow" from GitHub UI
+```bash
+git clone https://github.com/syed-kaif07/AI-tech-brief.git
+cd "AI-tech-brief"
+pip install -r requirements.txt
 ```
 
-GitHub cron uses **UTC**. IST = UTC + 5:30.
+Add secrets to `.env`:
 
-## 📰 Feeds
-
-Edit `feeds.json`. Current sources (as of build):
-
-- TechCrunch AI
-- The Verge
-- Ars Technica
-- Anthropic Blog
-- OpenAI Blog
-- MIT Technology Review
-- r/MachineLearning (Reddit RSS)
-- r/hardware (Reddit RSS)
-- r/AI_Agents (Reddit RSS)
-
-To add a feed:
-```json
-{ "name": "Source Name", "url": "https://example.com/rss", "category": "ai" }
+```env
+EMAIL_ADDRESS=syedkaifuddin777@gmail.com
+EMAIL_APP_PASSWORD=your_app_password
+RECIPIENT_EMAIL=syedkaifuddin4@gmail.com,rahmnatwork@gmail.com
+SENDER_EMAIL=syedkaifuddin777@gmail.com
 ```
 
-## 📄 Output
+Test once:
 
-- `public/data/daily-brief.json` — machine-readable result written after every successful run
-- HTML email — sent via Resend
-
-## 🛠 Tech Stack
-
-- Python 3.11+
-- feedparser — RSS fetching
-- resend — email delivery
-- GitHub Actions — scheduler
-- dotenv — local secrets
-
-## 🔒 Secrets
-
-Never commit real API keys. `.env` is gitignored. In GitHub, set secrets under **Settings → Secrets and variables → Actions**:
-
-- `RESEND_API_KEY`
-- `RECIPIENT_EMAIL`
-- `SENDER_EMAIL`
-
-If running locally only, `.env` is enough.
-
-## 📦 Project Structure
-
-```
-AI TECH BRIEF GMAIL SETUP/
-├── fetch_and_send.py          # main script: fetch → filter → format → send
-├── feeds.json                 # RSS sources
-├── requirements.txt
-├── .env                       # your secrets (gitignored)
-├── .github/
-│   └── workflows/
-│       └── daily-brief.yml    # cron + sender
-└── public/
-    └── data/
-        └── daily-brief.json   # generated output (gitignored)
+```bash
+python3 fetch_and_send.py
 ```
 
-## ✅ Done
+---
 
-After setup:
-- You get one email per scheduled run
-- JSON archive builds up locally / in repo artifacts
-- Add/remove feeds anytime in `feeds.json`
+## Automation
 
-Open an issue or PR if you want changes to formatting or sources.
+GitHub Actions cron is at `.github/workflows/daily-brief.yml`.
+
+| Schedule | Cron (UTC) | IST |
+|----------|-----------|-----|
+| Daily 7 AM | `0 1:30 * * *` | 7:00 AM IST |
+
+Add a second run by adding another `cron` line in the workflow file.
+
+---
+
+## Feeds
+
+Edit `feeds.json` to add/remove sources.
+
+**Current sources:** TechCrunch AI, The Verge, Ars Technica, Anthropic Blog, OpenAI Blog, MIT Technology Review, r/MachineLearning, r/hardware, r/AI_Agents.
+
+---
+
+## Output
+
+- **Email:** HTML brief sent to all recipients
+- **JSON:** `public/data/daily-brief.json` (machine-readable archive)
+
+---
+
+## Tech Stack
+
+- Python + `feedparser`
+- Gmail SMTP (TLS)
+- GitHub Actions
+
+---
+
+## Notes
+
+- `.env` is gitignored — never commit secrets
+- Run `python3 fetch_and_send.py` anytime for an instant manual brief
+- For GitHub automation, add the same secrets under **Settings → Secrets and variables → Actions**
