@@ -10,7 +10,7 @@ Automated daily email with the latest AI/LLM and tech news. Fetches RSS feeds fr
 
 ## System Flow
 
-![Daily AI Tech Brief — System Flow](https://raw.githubusercontent.com/syed-kaif07/AI-tech-brief/main/flowchart.png)
+![Daily AI Tech Brief — System Flow](https://raw.githubusercontent.com/syed-kaif07/AI-tech-brief/main/Flowchart.png)
 
 ---
 
