@@ -324,12 +324,8 @@ def build_html_email(brief):
         {top_html}
 
         <div class="section">
-          <div class="section-title">🔥 Top Story: {html.escape(top['headline'] if top else 'N/A')}</div>
-          <div class="bullet">• Three-tiered model family: <strong>Sol</strong> (flagship), <strong>Terra</strong> (balanced), <strong>Luna</strong> (fast/cheap)</div>
-          <div class="bullet">• Optimized for coding, cybersecurity & biology workloads; one variant is purpose-built for <strong>long-horizon agent tasks</strong></div>
-          <div class="bullet">• <strong>Launched under U.S. government restriction</strong> — initial access limited to ~20 pre-approved partners</div>
-          <div class="bullet">• OpenAI says restrictions shouldn't be the long-term norm; broader release planned for the coming weeks</div>
-          <div class="bullet">• Pricing: Sol <strong>$5/$30</strong> per 1M tokens, Terra <strong>$2.50/$15</strong>, Luna <strong>$1/$6</strong></div>
+          <div class="section-title">⚡ TL;DR for a GenAI dev like you</div>
+          {tldr_html}
         </div>
 
         <div class="section">
@@ -340,11 +336,6 @@ def build_html_email(brief):
         <div class="section">
           <div class="section-title">🏢 Enterprise Agent Launches This Week</div>
           {enterprise_html}
-        </div>
-
-        <div class="section">
-          <div class="section-title">⚡ TL;DR for a GenAI dev like you</div>
-          {tldr_html}
         </div>
 
         <div class="section">
