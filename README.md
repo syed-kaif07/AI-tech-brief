@@ -27,14 +27,14 @@ Add secrets to `.env` (copy from `.env.example`):
 ```env
 EMAIL_ADDRESS=your-email@gmail.com
 EMAIL_APP_PASSWORD=your-app-password
-RECIPIENT_EMAIL=recipient1@email.com,recipient2@email.com
 SENDER_EMAIL=your-email@gmail.com
 ```
 
-```
+**Recipients:**  
+- Local: `recipients.json`  
+- GitHub Actions: `RECIPIENT_EMAIL` secret
 
 Test once:
-
 ```bash
 python3 fetch_and_send.py
 ```
@@ -63,21 +63,23 @@ Edit `feeds.json` to add/remove sources.
 
 ## Output
 
-- **Email:** HTML brief sent to all recipients
+- **Email:** HTML brief sent to all recipients  
 - **JSON:** `public/data/daily-brief.json` (machine-readable archive)
 
 ---
 
 ## Tech Stack
 
-- Python + `feedparser`
-- Gmail SMTP (TLS)
+- Python + `feedparser`  
+- Gmail SMTP (TLS)  
 - GitHub Actions
 
 ---
 
 ## Notes
 
-- `.env` is gitignored — never commit secrets
-- Run `python3 fetch_and_send.py` anytime for an instant manual brief
-- For GitHub automation, add the same secrets under **Settings → Secrets and variables → Actions**
+- `.env` is gitignored — never commit secrets  
+- `recipients.json` is gitignored — local-only recipient list  
+- Run `python3 fetch_and_send.py` anytime for an instant manual brief  
+- For GitHub automation, add the same secrets under **Settings → Secrets and variables → Actions**  
+- For 100+ recipients, use a Google Group and store just the group email in secrets
