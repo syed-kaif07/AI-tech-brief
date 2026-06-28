@@ -26,7 +26,12 @@ Add secrets to `.env`:
 
 ```env
 EMAIL_ADDRESS=syedkaifuddin777@gmail.com
-EMAIL_APP_PASSWORD=your_app_password
+EMAIL_APP_PASSWORD=your_app_password_here
+RECIPIENT_EMAIL=syedkaifuddin4@gmail.com,rahmnatwork@gmail.com
+SENDER_EMAIL=syedkaifuddin777@gmail.com
+```
+
+Test once:
 RECIPIENT_EMAIL=syedkaifuddin4@gmail.com,rahmnatwork@gmail.com
 SENDER_EMAIL=syedkaifuddin777@gmail.com
 ```
