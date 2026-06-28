@@ -31,9 +31,6 @@ RECIPIENT_EMAIL=recipient1@email.com,recipient2@email.com
 SENDER_EMAIL=your-email@gmail.com
 ```
 
-Test once:
-RECIPIENT_EMAIL=syedkaifuddin4@gmail.com,rahmnatwork@gmail.com
-SENDER_EMAIL=syedkaifuddin777@gmail.com
 ```
 
 Test once:
