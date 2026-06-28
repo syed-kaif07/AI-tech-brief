@@ -10,7 +10,7 @@ Automated daily email with the latest AI/LLM and tech news. Fetches RSS feeds fr
 
 ## System Flow
 
-View the system diagram: open `flowchart.html` in your browser.
+![Daily AI Tech Brief — System Flow](flowchart.svg)
 
 ---
 
