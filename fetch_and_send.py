@@ -9,7 +9,7 @@ load_dotenv()
 
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "syedkaifuddin4@gmail.com")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD", "")
-RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL", "syedkaifuddin4@gmail.com")
+RECIPIENT_FILE = os.getenv("RECIPIENT_FILE", "recipients.json")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", EMAIL_ADDRESS)
 
 FEEDS_FILE = "feeds.json"
@@ -365,7 +365,14 @@ def build_html_email(brief):
 
 def send_email(html_content, subject):
     try:
-        recipients = [addr.strip() for addr in RECIPIENT_EMAIL.split(",") if addr.strip()]
+        # Load recipients from file (primary) or env var (fallback)
+        recipients = []
+        if os.path.exists(RECIPIENT_FILE):
+            with open(RECIPIENT_FILE, "r", encoding="utf-8") as f:
+                recipients = [addr.strip() for addr in json.load(f) if addr.strip()]
+        if not recipients:
+            recipients = [addr.strip() for addr in os.getenv("RECIPIENT_EMAIL", "").split(",") if addr.strip()]
+        
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = SENDER_EMAIL
