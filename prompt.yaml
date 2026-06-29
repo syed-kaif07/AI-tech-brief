@@ -1,0 +1,16 @@
+llm_summary_prompt: |
+  You are an AI tech analyst. Given these news items, write:
+  1. A 2-3 sentence executive summary of the key themes across these stories.
+  2. Five concise bullet points explaining why this matters for a GenAI developer.
+
+  News items:
+  {articles}
+
+  Format exactly as:
+  SUMMARY: <executive summary>
+  BULLETS:
+  - <bullet 1>
+  - <bullet 2>
+  - <bullet 3>
+  - <bullet 4>
+  - <bullet 5>

@@ -1,9 +1,11 @@
-import os, json, datetime, re, html
+import os, json, datetime, re, html, requests
+import random
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import feedparser
 from dotenv import load_dotenv
+import yaml
 
 load_dotenv()
 
@@ -15,7 +17,14 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL", EMAIL_ADDRESS)
 FEEDS_FILE = "feeds.json"
 OUTPUT_FILE = "public/data/daily-brief.json"
 HOURS_LOOKBACK = int(os.getenv("HOURS_LOOKBACK", "24"))
-MAX_ARTICLES = int(os.getenv("MAX_ARTICLES", "25"))
+MAX_ARTICLES = int(os.getenv("MAX_ARTICLES", "50"))
+
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-4o-mini")
+
+with open("prompt.yaml", "r", encoding="utf-8") as f:
+    LLM_PROMPT_TEMPLATE = yaml.safe_load(f)["llm_summary_prompt"]
 
 KEYWORDS_WEIGHT = [
     "agent","agentic","llm","language model","gpt","claude","openai",
@@ -100,8 +109,42 @@ def fetch_feeds(feeds_path=FEEDS_FILE):
 
     for e in entries:
         e["relevance"] = relevance_score(e["title"], e["summary"], KEYWORDS_WEIGHT)
-    entries.sort(key=lambda x: (-x["relevance"], x["published"]))
+    # Sort by relevance first, then use a random tie-breaker so each run picks different articles
+    entries.sort(key=lambda x: (-x["relevance"], random.random()))
     return entries[:MAX_ARTICLES]
+
+
+def generate_llm_summary(entries):
+    api_key = LLM_API_KEY
+    if not api_key or not entries:
+        return None
+
+    context_parts = []
+    for i, e in enumerate(entries[:8], 1):
+        context_parts.append(f"{i}. [{e['source']}] {e['title']}: {e['summary']}")
+    context = "\n".join(context_parts)
+
+    prompt = LLM_PROMPT_TEMPLATE.replace("{articles}", context)
+
+    try:
+        resp = requests.post(
+            f"{LLM_BASE_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": LLM_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.3,
+                "max_tokens": 600,
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        print(f"[LLM WARN] {e}")
+        return None
+
 
 # ─── FORMAT BRIEF ──────────────────────────────────────────────────────────
 
@@ -129,11 +172,23 @@ def build_brief(entries):
         "summary": e["summary"],
     } for e in entries]
 
-    summary_text = (
-        f"{len(entries)} relevant stories from your source feeds. "
-        "Key angles: agentic AI progression, new model releases, pricing pressure, "
-        "enterprise adoption, and compute supply chain shifts."
-    )
+    llm_output = generate_llm_summary(entries)
+    if llm_output:
+        lines = [l.strip() for l in llm_output.splitlines() if l.strip()]
+        summary_text = lines[0] if lines else llm_output[:200]
+        llm_bullets = []
+        in_bullets = False
+        for line in lines[1:]:
+            if line.startswith("-") or line.startswith("•"):
+                llm_bullets.append(line.lstrip("-• ").strip())
+        llm_bullets = llm_bullets[:3]
+    else:
+        summary_text = (
+            f"{len(entries)} relevant stories from your source feeds. "
+            "Key angles: agentic AI progression, new model releases, pricing pressure, "
+            "enterprise adoption, and compute supply chain shifts."
+        )
+        llm_bullets = []
 
     top = entries[0] if entries else None
     brief = {
@@ -148,7 +203,7 @@ def build_brief(entries):
         } if top else None,
         "trendingTopics": [{"name": n, "count": c} for n, c in trending],
         "newsCards": _build_news_cards(entries),
-        "highlights": _build_highlights(entries, trending),
+        "highlights": _build_highlights(entries, trending, llm_bullets=llm_bullets),
         "sourceBreakdown": breakdown,
         "articles": articles,
     }
@@ -189,20 +244,26 @@ def _build_news_cards(entries):
     return cards
 
 
-def _build_highlights(entries, trending):
+def _build_highlights(entries, trending, llm_bullets=None):
     if not entries:
         return []
     top = entries[0]
     topic = trending[0][0] if trending else "AI"
+    bullets = llm_bullets if llm_bullets else [
+        f"Top story today centers on {topic.lower()}. "
+        "Market and developer signals indicate this will affect pricing, "
+        "tooling choices, and enterprise adoption in the next quarter."
+    ]
+    why_it_matters = bullets[0] if bullets else (
+        f"Top story today centers on {topic.lower()}. "
+        "Market and developer signals indicate this will affect pricing, "
+        "tooling choices, and enterprise adoption in the next quarter."
+    )
     return [{
         "topic": topic,
         "headline": top["title"],
         "url": top["link"],
-        "whyItMatters": (
-            f"Top story today centers on {topic.lower()}. "
-            "Market and developer signals indicate this will affect pricing, "
-            "tooling choices, and enterprise adoption in the next quarter."
-        ),
+        "whyItMatters": why_it_matters,
     }]
 
 # ─── EMAIL FORMAT ──────────────────────────────────────────────────────────

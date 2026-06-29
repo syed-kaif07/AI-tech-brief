@@ -9,6 +9,17 @@
     { "name": "Machine Learning Subreddit", "url": "https://www.reddit.com/r/MachineLearning/.rss", "category": "ai" },
     { "name": "Hardware Subreddit", "url": "https://www.reddit.com/r/hardware/.rss", "category": "hardware" },
     { "name": "AI Agents Subreddit", "url": "https://www.reddit.com/r/AI_Agents/.rss", "category": "ai" },
-    { "name": "Google News AI Search", "url": "https://news.google.com/rss/search?q=AI+LLM+agentic+artificial+intelligence&hl=en-US&gl=US&ceid=US:en", "category": "ai" }
+    { "name": "Google News AI Search", "url": "https://news.google.com/rss/search?q=AI+LLM+agentic+artificial+intelligence&hl=en-US&gl=US&ceid=US:en", "category": "ai" },
+    { "name": "Wired", "url": "https://www.wired.com/feed/", "category": "tech" },
+    { "name": "TechCrunch", "url": "https://techcrunch.com/feed/", "category": "tech" },
+    { "name": "Bloomberg Technology", "url": "https://feeds.bloomberg.com/technology/news.rss", "category": "tech" },
+    { "name": "BBC Technology", "url": "https://feeds.bbci.co.uk/news/technology/rss.xml", "category": "tech" },
+    { "name": "ZDNet News", "url": "https://www.zdnet.com/news/rss.xml", "category": "tech" },
+    { "name": "The Next Web", "url": "https://thenextweb.com/feed", "category": "tech" },
+    { "name": "VentureBeat AI", "url": "https://venturebeat.com/category/ai/feed/", "category": "ai" },
+    { "name": "AI Weekly", "url": "https://aiweekly.co/feed", "category": "ai" },
+    { "name": "Hacker News", "url": "https://hnrss.org/newest?points=100", "category": "tech" },
+    { "name": "AI Stack Exchange", "url": "https://ai.stackexchange.com/feeds", "category": "ai" },
+    { "name": "The Information", "url": "https://www.theinformation.com/feed", "category": "tech" }
   ]
 }
