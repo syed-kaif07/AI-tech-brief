@@ -207,9 +207,11 @@ def _build_highlights(entries, trending):
 
 # ─── EMAIL FORMAT ──────────────────────────────────────────────────────────
 
-def build_html_email(brief):
+def build_html_email(brief, entries=None):
     date_str = brief["date"]
     articles = brief.get("articles", [])
+    if entries is None:
+        entries = articles
     styles = """
     <style>
       body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e5e7eb;margin:0;padding:0}
@@ -283,34 +285,122 @@ def build_html_email(brief):
         for src, pct in sorted(breakdown.items(), key=lambda x: -x[1])
     )
 
-    leaderboard_items = {
-        "Top performer": "Claude Fable 5 leads at 100/100 (Swfte leaderboard)",
-        "Best agentic all-rounder": "GPT-5.5 at $5/$30 per 1M tokens",
-        "Best price/performance coding": "DeepSeek V4 Pro at <strong>$0.435/$0.87 per 1M</strong> — 5–34x cheaper than closed models",
-        "Cheapest viable API": "DeepSeek V4 Flash at <strong>$0.14/$0.28 per 1M</strong>",
-        "Longest context": "Llama 4 Scout hits <strong>10M tokens</strong> (unique among frontier models)",
-        "Supply chain note": "Google reportedly couldn't fulfill Meta's full Gemini API capacity request in March, disrupting internal AI projects",
-    }
-    leaderboard_html = "".join(f"<div class='bullet'>• <strong>{k}:</strong> {v}</div>" for k, v in leaderboard_items.items())
+    leaderboard_html = ""
+    llm_mentions = {}
+    agent_mentions = {}
+    pricing_mentions = {}
+    context_mentions = []
+    enterprise_mentions = []
 
-    enterprise_items = [
-        "Ramen Aura 15.0 — multi-agent assistant for Unreal Engine / Unity game dev",
-        "Trintech Flux Agent — automated financial close fluctuation analysis",
-        "EZ Texting — full platform overhaul to agentic AI for marketing ops",
-        "BreachRx Rex Platform — agentic AI incident command center for cyberattacks",
-        "Checksum API Agent — autonomous journey-based API testing in CI/CD",
-        "IGC Pharma AHA — agentic AI for Alzheimer's drug discovery, claims 90% research workload reduction",
+    for e in entries:
+        title = e["title"]
+        summary = e["summary"]
+        text = f"{title} {summary}".lower()
+        topic = classify_topic(title, summary)
+
+        # Count LLM model mentions
+        models = {
+            "claude": "Claude",
+            "gpt": "GPT",
+            "openai": "OpenAI",
+            "anthropic": "Anthropic",
+            "deepseek": "DeepSeek",
+            "llama": "Llama",
+            "gemini": "Gemini",
+            "mistral": "Mistral",
+            "qwen": "Qwen",
+            "groq": "Groq",
+        }
+        for kw, name in models.items():
+            if kw in text:
+                llm_mentions[name] = llm_mentions.get(name, 0) + 1
+
+        # Agentic/enterprise mentions
+        if "enterprise" in text or "business" in text or "commercial" in text:
+            enterprise_mentions.append(title)
+        if topic == "Agentic AI":
+            agent_mentions[title] = e["relevance"]
+
+        # Pricing
+        if "$" in text or "pricing" in text or "per million" in text or "per 1m" in text:
+            pricing_mentions[title] = e["relevance"]
+
+        # Context window
+        if "context" in text or "token" in text:
+            context_mentions.append(title)
+
+    # Top performer = most mentioned LLM
+    top_performer = max(llm_mentions, key=llm_mentions.get) if llm_mentions else "N/A"
+    top_llm_count = llm_mentions.get(top_performer, 0)
+
+    leaderboard_items = []
+    if top_performer != "N/A":
+        leaderboard_items.append(f"Top performer today: <strong>{top_performer}</strong> ({top_llm_count} mentions)")
+
+    if pricing_mentions:
+        best_price = sorted(pricing_mentions, key=pricing_mentions.get, reverse=True)[0]
+        leaderboard_items.append(f"Pricing highlight: {best_price[:80]}")
+
+    if context_mentions:
+        leaderboard_items.append(f"Context/token news: {context_mentions[0][:80]}")
+
+    if agent_mentions:
+        top_agent = sorted(agent_mentions, key=agent_mentions.get, reverse=True)[0]
+        leaderboard_items.append(f"Top agentic story: {top_agent[:80]}")
+
+    if len(leaderboard_items) < 2:
+        trending_names = [t["name"] for t in brief.get("trendingTopics", [])[:3]]
+        for tn in trending_names:
+            leaderboard_items.append(f"Trending: <strong>{tn}</strong>")
+
+    if not leaderboard_items:
+        leaderboard_items = [f"{len(entries)} stories curated from {len(brief.get('sourceBreakdown', {}))} sources"]
+
+    leaderboard_html = "".join(
+        f"<div class='bullet'>• {item}</div>" for item in leaderboard_items
+    )
+
+    enterprise_items = []
+    candidate_keywords = [
+        "enterprise", "business", "commercial", "launch", "release",
+        "product", "platform", "agentic", "automation", "deploy",
+        "integration", "workflow", "customer", "solution",
     ]
+    for e in entries:
+        title = e["title"]
+        text = f"{title} {e['summary']}".lower()
+        score = sum(1 for k in candidate_keywords if k in text)
+        if score >= 2:
+            enterprise_items.append(title)
+
+    # Fallback: use top relevance Agentic AI + General Tech items
+    if len(enterprise_items) < 3:
+        for e in entries:
+            topic = classify_topic(e["title"], e["summary"])
+            t = e["title"]
+            if topic in ("Agentic AI", "General Tech") and t not in enterprise_items:
+                enterprise_items.append(t)
+            if len(enterprise_items) >= 6:
+                break
+
+    enterprise_items = enterprise_items[:6]
+    if not enterprise_items:
+        enterprise_items = [f"No clear enterprise launches in the last {HOURS_LOOKBACK}h"]
     enterprise_html = "".join(f"<div class='bullet'>• {html.escape(x)}</div>" for x in enterprise_items)
 
-    tldr_items = [
-        "GPT-5.6 just dropped — focus is agentic long-horizon tasks, pricing is aggressive vs rivals",
-        "Build with DeepSeek V4 Pro/Flash if you care about cost-to-reasoning ratio",
-        "MCP is back in favor for enterprise integrations; don't ignore it",
-        "CLI agents > IDE agents for real shipping velocity",
-        "SLMs are production-ready for many agent tasks — not just research toys",
-        "The market is <strong>$7.8B</strong> now, projected <strong>$52B</strong> by 2030; Gartner says <strong>40%</strong> of enterprise apps will embed agents by end of 2026",
-    ]
+    tldr_items = []
+    if top:
+        tldr_items.append(f"Top story today: {top['title']}")
+    for topic_name, topic_count in brief.get("trendingTopics", [])[:3]:
+        tldr_items.append(f"<strong>{topic_name}</strong> is trending ({topic_count} stories)")
+    for e in entries[:4]:
+        tldr_items.append(e["title"])
+    market_line = (
+        "The AI market is ~<strong>$7.8B</strong> today, projected <strong>$52B</strong> by 2030; "
+        "Gartner expects <strong>40%</strong> of enterprise apps to embed agents by end of 2026."
+    )
+    tldr_items.append(market_line)
+    tldr_items = tldr_items[:6]
     tldr_html = "".join(f"<div class='bullet'>{i}. {x}</div>" for i, x in enumerate(tldr_items, 1))
 
     return f"""
@@ -402,7 +492,7 @@ def main():
 
     today = datetime.datetime.now().strftime("%B %d, %Y")
     subject = f"Tech Brief — {today}"
-    html_body = build_html_email(brief)
+    html_body = build_html_email(brief, entries=entries)
 
     print("[*] Sending...")
     send_email(html_body, subject)
